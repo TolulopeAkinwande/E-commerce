@@ -55,6 +55,12 @@ export default function ProductList() {
   const merchandiseTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
   const formattedTotal = merchandiseTotal.toFixed(2);
   
+  const handleCheckOut = () => {
+    setCartItems([])
+    alert(
+      "checkout successfull"
+    );
+  }
   
   return (
     <>
@@ -89,11 +95,6 @@ export default function ProductList() {
               <div className="flex-1 overflow-auto p-6 space-y-6">
                 {cartItems.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                    <img
-                      src="/empty-cart-illustration.svg"
-                      alt="Empty cart"
-                      className="w-40 h-40 object-contain mb-4"
-                    />
                     <p>No products here.</p>
                   </div>
 
@@ -144,9 +145,8 @@ export default function ProductList() {
                   <span className="text-xl font-bold">₦ {formattedTotal}</span>
                 </div>
 
-                <button
+                <button onClick={handleCheckOut}
                   className="w-full py-3 text-white font-semibold rounded-lg bg-gradient-to-r from-amber-950 to-green-800 disabled:opacity-50"
-                  disabled
                 >
                   PROCEED TO CHECKOUT
                 </button>
