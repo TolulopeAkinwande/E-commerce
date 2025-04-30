@@ -95,7 +95,7 @@ export default function ProductList() {
               <div className="flex-1 overflow-auto p-6 space-y-6">
                 {cartItems.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                    <p>No products here.</p>
+                    <p>Your cart is empty</p>
                   </div>
 
                 ) : (
