@@ -1,13 +1,12 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "../lib/types";
 import { FiShoppingCart, FiX } from "react-icons/fi";
 
 export default function ProductList() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [cartItems, setCartItems] = useState<Product[]>([]);
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -15,8 +14,13 @@ export default function ProductList() {
         const { data } = await axios.get<Product[]>(
           "https://fakestoreapi.com/products"
         );
-        setProducts(data);
-        setFilteredProducts(data);
+        setProducts(data.map((product) => {
+          const updatedPrice = (0.022 * product.price) + product.price;
+          return {
+            ...product,
+            price: Number(updatedPrice.toFixed(2)),
+          }
+        }));
       } catch (err) {
         console.error("Error fetching products:", err);
       }
@@ -35,7 +39,7 @@ export default function ProductList() {
     }
     try {
       setCartItems(prev => [...prev, product]);
-      alert("products already exist inside the cart");
+      alert("product added to cart");
     }
     catch (error) {
       console.error("Add to cart error:, error");
@@ -50,7 +54,8 @@ export default function ProductList() {
   }
   const merchandiseTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
   const formattedTotal = merchandiseTotal.toFixed(2);
-
+  
+  
   return (
     <>
       <header className="bg-amber-950 px-4 sm:px-6 lg:px-10 py-3">
@@ -68,7 +73,7 @@ export default function ProductList() {
 
         {isOpen && (
           <div className="fixed inset-0 z-50 flex">
-            <div className="absolute inset-0 bg-black/50" onClick={() => setIsOpen(false)}/>
+            <div className="absolute inset-0 bg-black/50" onClick={() => setIsOpen(false)} />
 
             <aside className="relative ml-auto w-full max-w-md bg-white h-full shadow-xl flex flex-col">
               <header className="flex items-center justify-between px-6 py-4 border-b">
@@ -81,32 +86,62 @@ export default function ProductList() {
                 </button>
               </header>
 
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="flex flex-col items-center justify-center h-full space-y-4">
-                  <img
-                    src="/empty-cart-illustration.svg"
-                    alt="Empty cart"
-                    className="w-40 h-40 object-contain"
-                  />
-                  <p className="text-gray-600">No products here.</p>
-                </div>
+              <div className="flex-1 overflow-auto p-6 space-y-6">
+                {cartItems.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                    <img
+                      src="/empty-cart-illustration.svg"
+                      alt="Empty cart"
+                      className="w-40 h-40 object-contain mb-4"
+                    />
+                    <p>No products here.</p>
+                  </div>
+
+                ) : (
+                  cartItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex gap-4 border-b pb-4 last:border-none">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-20 h-20 object-cover rounded"
+                      />
+                      <div className="flex-1 flex flex-col">
+                        <p className="font-medium">{item.title}</p>
+                        <span className="text-sm text-gray-500">
+                          {item.category}
+                        </span>
+                        <p className="text-black font-bold mt-1">
+                          ₦ {item.price.toFixed(2)}
+                        </p>
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="mt-2 text-sm text-red-500 hover:underline self-start"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
               <footer className="px-6 py-4 border-t">
                 <dl className="mb-4 space-y-2">
                   <div className="flex justify-between">
                     <dt className="text-gray-700">Merchandise:</dt>
-                    <dd className="font-medium">₦0</dd>
+                    <dd className="font-medium">₦ {formattedTotal}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-gray-700">Estimated shipping:</dt>
-                    <dd className="font-medium">₦0</dd>
+                    <dd className="font-medium">₦ 0.00</dd>
                   </div>
                 </dl>
 
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-lg font-bold">ORDER TOTAL</span>
-                  <span className="text-xl font-bold">₦0</span>
+                  <span className="text-xl font-bold">₦ {formattedTotal}</span>
                 </div>
 
                 <button
@@ -145,11 +180,12 @@ export default function ProductList() {
                 </p>
 
                 <div className="mt-auto flex items-center justify-between">
-                  <button className="px-2 py-1 text-xs bg-amber-950 text-white rounded">
+                  <button onClick={() => addToCart(product)}
+                    className="px-2 py-1 text-xs bg-amber-950 text-white rounded">
                     Add to cart
                   </button>
                   <span className="text-sm font-semibold text-amber-950">
-                    ${product.price.toFixed(2)}
+                  ₦{product.price}
                   </span>
                 </div>
               </div>
